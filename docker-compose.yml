@@ -1,0 +1,161 @@
+version: "3.0"
+
+services:
+  node1:
+    container_name: node1
+    restart: always
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    networks:
+      - es-net
+    environment:
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - ES_JAVA_OPTS=${JAVA_OPTS}
+    volumes: 
+      - './certificates/certs:/usr/share/elasticsearch/config/certificates'
+      - './snapshots:/var/tmp/snapshots'
+      - './logs:/usr/share/elasticsearch/logs'
+      - ./elasticsearch/elasticsearch1.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ./node1data:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    deploy:
+      resources:
+        limits:
+          memory: ${MEM_LIMIT}
+    healthcheck:
+      interval: 20s
+      retries: 10
+      test: curl -s -k -u elastic:${ELASTIC_PASSWORD} https://localhost:9200/_cluster/health | grep -vq '"status":"red"'
+
+  node2:
+    container_name: node2
+    restart: always
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    networks:
+      - es-net
+    environment:
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - ES_JAVA_OPTS=${JAVA_OPTS}
+    depends_on:
+      - node1
+    volumes: 
+      - './certificates/certs:/usr/share/elasticsearch/config/certificates'
+      - './snapshots:/var/tmp/snapshots'
+      - ./elasticsearch/elasticsearch2.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ./node2data:/usr/share/elasticsearch/data
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    deploy:
+      resources:
+        limits:
+          memory: ${MEM_LIMIT}
+    healthcheck:
+      interval: 20s
+      retries: 10
+      test: curl -s -k -u elastic:${ELASTIC_PASSWORD} https://localhost:9200/_cluster/health | grep -vq '"status":"red"'
+
+  node3:
+    container_name: node3
+    restart: always
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    networks:
+      - es-net
+    environment:
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - ES_JAVA_OPTS=${JAVA_OPTS}
+    depends_on:
+      - node2
+    volumes: 
+      - './certificates/certs:/usr/share/elasticsearch/config/certificates'
+      - './snapshots:/var/tmp/snapshots'
+      - ./elasticsearch/elasticsearch3.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ./node3data:/usr/share/elasticsearch/data
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    deploy:
+      resources:
+        limits:
+          memory: ${MEM_LIMIT}
+    healthcheck:
+      interval: 20s
+      retries: 10
+      test: curl -s -k -u elastic:${ELASTIC_PASSWORD} https://localhost:9200/_cluster/health | grep -vq '"status":"red"'
+
+  kibana:
+    container_name: kibana
+    restart: always
+    image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
+    environment:
+      - SERVERNAME=kibana
+      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - SERVER_SSL_ENABLED=true
+      - SERVER_SSL_KEY=/usr/share/kibana/config/certificates/kibana/kibana.key
+      - SERVER_SSL_CERTIFICATE=/usr/share/kibana/config/certificates/kibana/kibana.crt
+      - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=/usr/share/kibana/config/certificates/ca/ca.crt
+    volumes:
+      - ./kibana/kibana1.yml:/usr/share/kibana/config/kibana.yml
+      - ./certificates/certs:/usr/share/kibana/config/certificates
+    networks:
+      - es-net
+    depends_on:
+      node1:
+        condition: service_healthy
+      node2:
+        condition: service_healthy
+      node3:
+        condition: service_healthy
+    ports:
+      - 5601:5601
+  
+  fleet:
+    container_name: fleet
+    restart: always
+    image: docker.elastic.co/beats/elastic-agent:${STACK_VERSION}
+    user: root
+    environment:
+      - FLEET_SERVER_ENABLE=1
+      - FLEET_SERVER_ELASTICSEARCH_HOST=https://node1:9200
+      - FLEET_SERVER_ELASTICSEARCH_CA=/usr/share/elastic-agent/config/certificates/ca/ca.crt
+      - FLEET_URL=https://fleet:8220
+      - FLEET_CA=/usr/share/elastic-agent/config/certificates/ca/ca.crt
+      - FLEET_SERVER_CERT=/usr/share/elastic-agent/config/certificates/fleet/fleet.crt
+      - FLEET_SERVER_CERT_KEY=/usr/share/elastic-agent/config/certificates/fleet/fleet.key
+      - CERTIFICATE_AUTHORITIES=/usr/share/elasticsearch/config/certificates/ca/ca.crt
+      - FLEET_SERVER_SERVICE_TOKEN=AAEAAWVsYXN0aWMvZmxlZXQtc2VydmVyL3Rva2VuLTE2NjAyNjk3MzIxMzA6RzlGXy1YU1FSOXk1dTgtQXplemQ3dw
+      - FLEET_SERVER_POLICY_ID=fleet-server-policy
+    volumes:
+      - ./certificates/certs:/usr/share/elastic-agent/config/certificates
+      - ./fleetdata:/usr/share/elastic-agent/state
+    ports:
+      - 8220:8220
+    networks:
+      - es-net
+networks:
+  es-net:
+    driver: bridge
+
+volumes:
+  certs:
+  snapshots:
+  node1data:
+  node2data:
+  node3data:
+  fleetdata:

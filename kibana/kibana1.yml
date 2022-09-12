@@ -1,0 +1,23 @@
+elasticsearch:
+  hosts: https://node1:9200
+  username: kibana_system
+  ssl.certificateAuthorities: /usr/share/kibana/config/certificates/ca/ca.crt
+
+server.publicBaseUrl: http://10.8.10.40:5601
+server.host: 0.0.0.0
+
+#xpack.fleet.packages:
+#  - name: fleet_server
+#    version: latest
+#  - name: system
+#    version: latest
+#xpack.fleet.agentPolicies:
+#  - name: Fleet Server policy
+#    id: fleet-server-policy
+#    namespace: default
+#    package_policies:
+#      - name: fleet_server-1
+#        package:
+#          name: fleet_server
+
+xpack.encryptedSavedObjects.encryptionKey: NdRgUkXn2r5u8x/A?D(G+KbPeShVmYq3s6v9y$B&E)H@McQfTjWnZr4u7w!z%C*F

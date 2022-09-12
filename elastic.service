@@ -1,0 +1,13 @@
+[Unit]
+Description=Docker Compose Service for Elasticsearch
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/docker-compose -f /path/to/docker-compose.yml up
+ExecReload=/usr/loca/bin/docker-compose -f /path/to/docker-compsoe.yml down
+Restart=on-failure
+RestartSec=42s
+
+[Install]
+WantedBy=multi-user.target

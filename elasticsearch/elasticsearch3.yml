@@ -1,0 +1,24 @@
+xpack.security.enabled: true
+network.host: 0.0.0.0
+
+xpack.security.http.ssl.enabled: true
+xpack.security.http.ssl.key: /usr/share/elasticsearch/config/certificates/node3/node3.key
+xpack.security.http.ssl.certificate_authorities: /usr/share/elasticsearch/config/certificates/ca/ca.crt
+xpack.security.http.ssl.certificate: /usr/share/elasticsearch/config/certificates/node3/node3.crt
+xpack.security.http.ssl.verification_mode: certificate
+
+xpack.security.transport.ssl.enabled: true
+xpack.security.transport.ssl.key: /usr/share/elasticsearch/config/certificates/node3/node3.key
+xpack.security.transport.ssl.certificate: /usr/share/elasticsearch/config/certificates/node3/node3.crt
+xpack.security.transport.ssl.certificate_authorities: /usr/share/elasticsearch/config/certificates/ca/ca.crt
+xpack.security.transport.ssl.verification_mode: certificate
+
+bootstrap.memory_lock: true
+
+cluster.name: elastic-dev
+node.name: node3
+
+cluster.initial_master_nodes: node1,node2,node3
+discovery.seed_hosts: node1,node2
+
+path.repo: /var/tmp/snapshots

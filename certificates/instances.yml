@@ -1,0 +1,33 @@
+instances:
+  - name: node1
+    dns:
+      - node1 
+      - localhost
+    ip:
+      - 10.8.10.40
+
+  - name: node2
+    dns:
+      - node2
+      - localhost
+    ip:
+      - 10.8.10.40
+
+  - name: node3
+    dns:
+      - node3
+      - localhost
+    ip:
+      - 10.8.10.40
+  - name: fleet
+    dns:
+      - fleet
+      - localhost
+    ip:
+      - 10.8.10.40
+  - name: kibana
+    dns:
+      - kibana
+      - localhost
+    ip:
+      - 10.8.10.40
