@@ -1,2 +1,2 @@
-# elastic-podman
-basic elastic stack configs using podman with docker-compose
+# elastic-docker
+basic elastic stack configs using docker and docker-compose
