@@ -9,21 +9,14 @@ sudo sysctl -w vm.max_map_count=262144
 sudo echo "vm.max_map_count=262144" >> /etc/sysctl.conf
 
 sudo dnf update -y
-sudo dnf install podman-docker podman git dnsmasq cmake go -y
+sudo dnf install yum-utils docker-ce containerd.io docker-ce-cli -y
+sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 
-sudo systemctl enable podman
-sudo systemctl enable podman.socket
-sudo systemctl start podman
+#start docker
 
-# After ver 3.0 of podman the podman.sock is linked to /var/run/docker.sock which docker-compose requires to be present 
-sudo systemctl start podman.socket
+sudo systemctl enable docker
+sudo systemctl start docker
 
-#Install dnsname plugin for podman container name resolution
-cd ~
-git clone https://github.com/containers/dnsname
-cd dnsname/
-make PREFIX=/usr
-sudo make install PREFIX=/usr
 
 # Open ports for Kibana and Elasticsearch in firewall
 sudo firewall-cmd --add-port=5601/tcp --perma
