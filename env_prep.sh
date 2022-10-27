@@ -12,6 +12,11 @@ sudo dnf update -y
 sudo dnf install yum-utils docker-ce containerd.io docker-ce-cli -y
 sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 
+#install docker-compose
+
+curl -SL https://github.com/docker/compose/releases/download/v2.10.2/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+
 #start docker
 
 sudo systemctl enable docker
